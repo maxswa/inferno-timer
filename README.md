@@ -1,2 +1,3 @@
 # inferno-timer
-Created with CodeSandbox
+
+https://infernotimer.com/
