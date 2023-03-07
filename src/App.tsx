@@ -1,10 +1,11 @@
 import React, {
+  FunctionComponent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState
-} from "react";
+} from 'react';
 import {
   createMuiTheme,
   useMediaQuery,
@@ -22,7 +23,7 @@ import {
   Switch,
   Menu,
   Select
-} from "@material-ui/core";
+} from '@material-ui/core';
 import {
   MoreVert,
   Settings,
@@ -33,26 +34,26 @@ import {
   PaletteOutlined,
   InfoOutlined,
   Brightness7
-} from "@material-ui/icons";
+} from '@material-ui/icons';
 
-import "./styles.css";
+import './styles.css';
 
-const BOOP_SRC = "/boop.mp3";
+const BOOP_SRC = '/boop.mp3';
 const WARNING_SECONDS = 10;
 const SET_SECONDS = 210;
 const JAD_SECONDS = 105;
 
-const RED_COLOR = "#A225224D";
-const GREEN_COLOR = "#C0D68466";
+const RED_COLOR = '#A225224D';
+const GREEN_COLOR = '#C0D68466';
 
-const SHOW_HINTS_KEY = "SHOW_HINTS_KEY";
-const CHANGE_COLORS_KEY = "CHANGE_COLORS_KEY";
-const PALETTE_TYPE_KEY = "PALETTE_TYPE_KEY";
+const SHOW_HINTS_KEY = 'SHOW_HINTS_KEY';
+const CHANGE_COLORS_KEY = 'CHANGE_COLORS_KEY';
+const PALETTE_TYPE_KEY = 'PALETTE_TYPE_KEY';
 
 enum PaletteType {
-  DarkMode = "darkMode",
-  LightMode = "lightMode",
-  DeviceMode = "deviceMode"
+  DarkMode = 'darkMode',
+  LightMode = 'lightMode',
+  DeviceMode = 'deviceMode'
 }
 
 const isEnum = <E extends any>(
@@ -63,45 +64,45 @@ const isEnum = <E extends any>(
 const getHelperText = (step: number) => {
   switch (step) {
     case 0: {
-      return "Click anywhere to start timer. (Once first set spawns)";
+      return 'Click anywhere to start timer. (Once first set spawns)';
     }
     case 1: {
-      return "Click anywhere to pause timer. (Once Zuk is under 600 HP)";
+      return 'Click anywhere to pause timer. (Once Zuk is under 600 HP)';
     }
     case 2: {
-      return "Click anywhere to start Jad. (Once Zuk is under 480 HP)";
+      return 'Click anywhere to start Jad. (Once Zuk is under 480 HP)';
     }
     default: {
-      return "Good luck!";
+      return 'Good luck!';
     }
   }
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
   timerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end"
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end'
   },
   warning: {
-    animation: "0.5s alternate 0s infinite ease pulse",
+    animation: '0.5s alternate 0s infinite ease pulse',
     color: theme.palette.error.light
   },
   paused: {
     color: theme.palette.grey[500]
   },
   timer: {
-    userSelect: "none"
+    userSelect: 'none'
   },
   container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%"
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%'
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 10,
     right: 10
   },
@@ -109,18 +110,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginLeft: 10
   },
   settingsContainer: {
-    padding: "0 10px 10px"
+    padding: '0 10px 10px'
   },
   settingsIcon: {
-    margin: "8px 10px 8px 0"
+    margin: '8px 10px 8px 0'
   },
   settingsItem: {
-    display: "flex"
+    display: 'flex'
   }
 }));
 
-export default function App() {
-  const deviceDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+export const App: FunctionComponent = () => {
+  const deviceDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const classes = useStyles();
 
   const [seconds, setSeconds] = useState(SET_SECONDS);
@@ -137,7 +138,7 @@ export default function App() {
   const fabRef = useRef<HTMLButtonElement | null>(null);
 
   const audio = useMemo(() => new Audio(BOOP_SRC), []);
-  const paused = useMemo(() => typeof intervalId !== "number", [intervalId]);
+  const paused = useMemo(() => typeof intervalId !== 'number', [intervalId]);
   const helperText = useMemo(() => getHelperText(step), [step]);
   const isDarkMode = useMemo(
     () =>
@@ -150,7 +151,7 @@ export default function App() {
     () =>
       createMuiTheme({
         palette: {
-          type: isDarkMode ? "dark" : "light"
+          type: isDarkMode ? 'dark' : 'light'
         }
       }),
     [isDarkMode]
@@ -164,13 +165,13 @@ export default function App() {
   }, [audio, seconds, paused]);
   useEffect(() => {
     setChangeColors(
-      Boolean(JSON.parse(localStorage.getItem(CHANGE_COLORS_KEY) ?? "true"))
+      Boolean(JSON.parse(localStorage.getItem(CHANGE_COLORS_KEY) ?? 'true'))
     );
     setShowHints(
-      Boolean(JSON.parse(localStorage.getItem(SHOW_HINTS_KEY) ?? "true"))
+      Boolean(JSON.parse(localStorage.getItem(SHOW_HINTS_KEY) ?? 'true'))
     );
     const paletteValue = JSON.parse(
-      localStorage.getItem(PALETTE_TYPE_KEY) ?? "null"
+      localStorage.getItem(PALETTE_TYPE_KEY) ?? 'null'
     );
     setPaletteType(
       isEnum(paletteValue, PaletteType) ? paletteValue : PaletteType.DeviceMode
@@ -186,8 +187,8 @@ export default function App() {
   const closeDialog = useCallback(() => setIsDialogOpen(false), [
     setIsDialogOpen
   ]);
-  const play = React.useCallback(() => {
-    if (typeof intervalId !== "number") {
+  const play = useCallback(() => {
+    if (typeof intervalId !== 'number') {
       setIntervalId(
         window.setInterval(
           () => setSeconds((s) => (s - 1 === 0 ? SET_SECONDS : s - 1)),
@@ -237,7 +238,7 @@ export default function App() {
       <Box
         className={classes.container}
         onMouseDown={handleClick}
-        color="primary"
+        color='primary'
         style={{
           background: changeColors
             ? step === 1
@@ -246,25 +247,25 @@ export default function App() {
               ? RED_COLOR
               : undefined
             : undefined,
-          cursor: step < 3 ? "pointer" : undefined
+          cursor: step < 3 ? 'pointer' : undefined
         }}
       >
         <Typography
-          variant="h1"
+          variant='h1'
           className={`${classes.timer} ${
-            seconds <= WARNING_SECONDS ? classes.warning : ""
+            seconds <= WARNING_SECONDS ? classes.warning : ''
           }`}
           style={{ opacity: paused ? 0.6 : 1 }}
         >
           {new Date(seconds * 1000).toISOString().substr(15, 4)}
         </Typography>
         {showHints && (
-          <Typography style={{ opacity: 0.6, userSelect: "none" }}>
+          <Typography style={{ opacity: 0.6, userSelect: 'none' }}>
             {helperText}
           </Typography>
         )}
       </Box>
-      <Fab className={classes.fab} size="small" ref={fabRef} onClick={openMenu}>
+      <Fab className={classes.fab} size='small' ref={fabRef} onClick={openMenu}>
         <MoreVert />
       </Fab>
       <Menu
@@ -328,7 +329,7 @@ export default function App() {
                   }}
                 />
               }
-              label="Change Background Color"
+              label='Change Background Color'
             />
           </Box>
           <Box className={classes.settingsItem}>
@@ -351,11 +352,11 @@ export default function App() {
                   }}
                 />
               }
-              label="Show Hints"
+              label='Show Hints'
             />
           </Box>
         </Box>
       </Dialog>
     </ThemeProvider>
   );
-}
+};
