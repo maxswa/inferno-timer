@@ -1,4 +1,4 @@
-import React, {
+import {
   FunctionComponent,
   useCallback,
   useEffect,
@@ -7,7 +7,7 @@ import React, {
   useState
 } from 'react';
 import {
-  createMuiTheme,
+  createTheme,
   useMediaQuery,
   CssBaseline,
   ThemeProvider,
@@ -37,6 +37,7 @@ import {
 } from '@material-ui/icons';
 
 import './styles.css';
+import { animationInterval, getHelperText, isEnum } from './utils';
 
 const BOOP_SRC = '/boop.mp3';
 const WARNING_SECONDS = 10;
@@ -55,28 +56,6 @@ enum PaletteType {
   LightMode = 'lightMode',
   DeviceMode = 'deviceMode'
 }
-
-const isEnum = <E extends any>(
-  value: unknown,
-  matchingEnum: Record<string, E>
-): value is E =>
-  Object.keys(matchingEnum).some((key) => matchingEnum[key] === value);
-const getHelperText = (step: number) => {
-  switch (step) {
-    case 0: {
-      return 'Click anywhere to start timer. (Once first set spawns)';
-    }
-    case 1: {
-      return 'Click anywhere to pause timer. (Once Zuk is under 600 HP)';
-    }
-    case 2: {
-      return 'Click anywhere to start Jad. (Once Zuk is under 480 HP)';
-    }
-    default: {
-      return 'Good luck!';
-    }
-  }
-};
 
 const useStyles = makeStyles((theme: Theme) => ({
   timerContainer: {
@@ -120,12 +99,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
+const controller = new AbortController();
+
 export const App: FunctionComponent = () => {
   const deviceDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const classes = useStyles();
 
   const [seconds, setSeconds] = useState(SET_SECONDS);
-  const [intervalId, setIntervalId] = useState<number>();
   const [step, setStep] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -138,7 +118,7 @@ export const App: FunctionComponent = () => {
   const fabRef = useRef<HTMLButtonElement | null>(null);
 
   const audio = useMemo(() => new Audio(BOOP_SRC), []);
-  const paused = useMemo(() => typeof intervalId !== 'number', [intervalId]);
+  const paused = useMemo(() => step === 2, [step]);
   const helperText = useMemo(() => getHelperText(step), [step]);
   const isDarkMode = useMemo(
     () =>
@@ -149,7 +129,7 @@ export const App: FunctionComponent = () => {
   );
   const theme = useMemo(
     () =>
-      createMuiTheme({
+      createTheme({
         palette: {
           type: isDarkMode ? 'dark' : 'light'
         }
@@ -187,57 +167,44 @@ export const App: FunctionComponent = () => {
   const closeDialog = useCallback(() => setIsDialogOpen(false), [
     setIsDialogOpen
   ]);
-  const play = useCallback(() => {
-    if (typeof intervalId !== 'number') {
-      setIntervalId(
-        window.setInterval(
-          () => setSeconds((s) => (s - 1 === 0 ? SET_SECONDS : s - 1)),
-          1000
-        )
-      );
-    }
-  }, [setIntervalId, intervalId]);
-  const pause = useCallback(() => {
-    clearInterval(intervalId);
-    setIntervalId(undefined);
-  }, [intervalId]);
-  const startJad = useCallback(() => {
-    setSeconds((s) => s + JAD_SECONDS);
-    play();
-  }, [play]);
-  const reset = useCallback(() => {
-    pause();
-    setSeconds(SET_SECONDS);
-    closeMenu();
-    setStep(0);
-  }, [pause, setSeconds, closeMenu, setStep]);
-  const handleClick = useCallback(() => {
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const callback = () => setSeconds((seconds) => seconds - 1);
     switch (step) {
-      case 0: {
-        play();
-        break;
-      }
       case 1: {
-        pause();
+        callback();
+        animationInterval(1000, controller.signal, callback);
         break;
       }
       case 2: {
-        startJad();
+        // Timer is paused until next step
+        break;
+      }
+      case 3: {
+        setSeconds((seconds) => seconds + JAD_SECONDS);
+        animationInterval(1000, controller.signal, callback);
         break;
       }
       default: {
-        return;
       }
     }
-    setStep((s) => s + 1);
-  }, [step, setStep, play, pause, startJad]);
+    return () => controller.abort();
+  }, [step, setSeconds]);
+  const reset = useCallback(() => {
+    setStep(0);
+    setSeconds(SET_SECONDS);
+    closeMenu();
+  }, [setSeconds, closeMenu, setStep]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box
         className={classes.container}
-        onMouseDown={handleClick}
+        onMouseDown={() => {
+          setStep((step) => (step === 3 ? step : step + 1));
+        }}
         color='primary'
         style={{
           background: changeColors
