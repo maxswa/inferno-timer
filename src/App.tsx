@@ -33,7 +33,8 @@ import {
   Info,
   PaletteOutlined,
   InfoOutlined,
-  Brightness7
+  Brightness7,
+  GitHub
 } from '@material-ui/icons';
 
 import './styles.css';
@@ -249,6 +250,14 @@ export const App: FunctionComponent = () => {
         <MenuItem onClick={reset}>
           <RotateLeft />
           <Typography className={classes.menuItemText}>Reset Timer</Typography>
+        </MenuItem>
+        <MenuItem
+          component='a'
+          href='https://github.com/maxswa/inferno-timer'
+          target='_blank'
+        >
+          <GitHub />
+          <Typography className={classes.menuItemText}>View Code</Typography>
         </MenuItem>
       </Menu>
       <Dialog open={isDialogOpen} onClose={closeDialog}>
