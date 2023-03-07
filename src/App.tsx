@@ -99,8 +99,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const controller = new AbortController();
-
 export const App: FunctionComponent = () => {
   const deviceDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const classes = useStyles();
@@ -170,7 +168,8 @@ export const App: FunctionComponent = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    const callback = () => setSeconds((seconds) => seconds - 1);
+    const callback = () =>
+      setSeconds((seconds) => (seconds - 1 === 0 ? SET_SECONDS : seconds - 1));
     switch (step) {
       case 1: {
         callback();

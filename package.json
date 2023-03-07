@@ -1,7 +1,7 @@
 {
   "name": "inferno-timer",
   "version": "1.0.0",
-  "description": "Simple app for tracking minion timers in the OSRS Zuk fight",
+  "description": "A simple timer for TzKal-Zuk set spawns",
   "keywords": [
     "typescript",
     "react",
